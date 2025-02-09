@@ -30,8 +30,11 @@ def send_mqtt_message(topic: str, message: str) -> str:
     return "Message sent!"
 
 
+devicesQueryTool = FunctionTool.from_defaults(
+    get_list_of_devices,
+)
 
-tool = FunctionTool.from_defaults(
+mqttPublishTool = FunctionTool.from_defaults(
     send_mqtt_message,
 )
 
@@ -42,10 +45,10 @@ llm = OpenAI(model="gpt-4o-mini")
 system_prompt="You can send MQTT messages to control the light. For example, you can send the message { 'state': 'OFF' } to the MQTT topic 'moreillon/light-d084cb/command' to turn off the light."
 
 # initialize openai agent
-agent = OpenAIAgent.from_tools(tools=[tool], llm=llm, verbose=True, system_prompt=system_prompt)
+agent = OpenAIAgent.from_tools(tools=[devicesQueryTool,mqttPublishTool], llm=llm, verbose=True, system_prompt=system_prompt)
 
 
 client.connect(MQTT_HOST, int(MQTT_PORT))
 client.loop_start()
-agent.chat("Please turn the lights on in the living room.")
+agent.chat("Please turn the lights on in the kitchen")
 client.loop_stop()
